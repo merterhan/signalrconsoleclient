@@ -46,6 +46,21 @@ namespace SIGNALRCONSOLECLIENT._Console
 
             myHub.Invoke<string>("DoSomething", "I'm doing something!!!").Wait();
 
+            #region Handle Connection Lifetime Events
+            //Raised when the client detects a slow or frequently dropping connection.
+            hubConnection.ConnectionSlow += () => Console.WriteLine("Connection slow");
+            //Raised when the connection has disconnected.
+            hubConnection.Closed += () => Console.WriteLine("Connection stopped");
+            //Raised when the underlying transport has reconnected.
+            hubConnection.Reconnected += () => Console.WriteLine("Reconnected");
+            //Raised when the underlying transport begins reconnecting.
+            hubConnection.Reconnecting += () => Console.WriteLine("Reconnecting");
+            //Raised when the connection state changes. Provides the old state and the new state.
+            //ConnectionState Enumeration: Connecting, Connected, Reconnecting, Disconnected
+            hubConnection.StateChanged += (change) => Console.WriteLine("ConnectionState changed from: " + change.OldState + " to " + change.NewState);
+            //Raised when any data is received on the connection. Provides the received data.
+            hubConnection.Received += (data) => Console.WriteLine("Connection received" + data);
+            #endregion Handle Connection Lifetime Events
 
             Console.Read();
             hubConnection.Stop();
