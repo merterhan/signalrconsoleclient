@@ -8,18 +8,24 @@ namespace SIGNALRCONSOLECLIENT._Console
         private static void Main(string[] args)
         {
             //Set connection
-            var connection = new HubConnection("http://localhost:8080");
-            //Make proxy to hub based on hub name on server
-            var myHub = connection.CreateHubProxy("MyHub");
-            //Start connection
-            connection.Start().ContinueWith(task =>
-            {
-                if (task.IsFaulted)
+            var hubConnection = new HubConnection("http://localhost:8080");
 
-                    Console.WriteLine("There was an error opening the connection:{0}", task.Exception.GetBaseException());
-                else
-                    Console.WriteLine("Connected");
-            }).Wait();
+            //To enable client-side logging, set the TraceLevel and TraceWriter properties on the connection object.
+            hubConnection.TraceLevel = TraceLevels.All;
+            hubConnection.TraceWriter = Console.Out;
+
+            //Make proxy to hub based on hub name on server
+            var myHub = hubConnection.CreateHubProxy("MyHub");
+
+            //Start connection
+            hubConnection.Start().ContinueWith(task =>
+             {
+                 if (task.IsFaulted)
+
+                     Console.WriteLine("There was an error opening the connection:{0}", task.Exception.GetBaseException());
+                 else
+                     Console.WriteLine("Connected");
+             }).Wait();
 
             myHub.Invoke<string>("Send", "HELLO World ").ContinueWith(task =>
             {
@@ -42,7 +48,7 @@ namespace SIGNALRCONSOLECLIENT._Console
 
 
             Console.Read();
-            connection.Stop();
+            hubConnection.Stop();
         }
     }
 }
