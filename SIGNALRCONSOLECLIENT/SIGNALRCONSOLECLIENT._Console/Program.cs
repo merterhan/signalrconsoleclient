@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
 using System;
+using System.IO;
 
 namespace SIGNALRCONSOLECLIENT._Console
 {
@@ -11,11 +12,14 @@ namespace SIGNALRCONSOLECLIENT._Console
             var hubConnection = new HubConnection("http://localhost:8080");
 
             //To enable client-side logging, set the TraceLevel and TraceWriter properties on the connection object.
+            //Logging client events to a text file under SIGNALRCONSOLECLIENT._Console\bin\Debug
+            var writer = new StreamWriter("clientLog.txt");
+            writer.AutoFlush = true;
             hubConnection.TraceLevel = TraceLevels.All;
-            hubConnection.TraceWriter = Console.Out;
+            hubConnection.TraceWriter = writer;
 
             //Make proxy to hub based on hub name on server
-            var myHub = hubConnection.CreateHubProxy("MyHub");
+            IHubProxy myHub = hubConnection.CreateHubProxy("MyHub");
 
             //Start connection
             hubConnection.Start().ContinueWith(task =>
@@ -61,6 +65,9 @@ namespace SIGNALRCONSOLECLIENT._Console
             //Raised when any data is received on the connection. Provides the received data.
             hubConnection.Received += (data) => Console.WriteLine("Connection received" + data);
             #endregion Handle Connection Lifetime Events
+
+            //To handle errors that SignalR raises, you can add a handler for the Error event on the connection object.
+            hubConnection.Error += ex => Console.WriteLine("SignalR error: {0}", ex.Message);
 
             Console.Read();
             hubConnection.Stop();
